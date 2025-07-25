@@ -50,7 +50,13 @@ selected = option_menu(
 if selected == "Home":
     st.title("✈️ Aircraft Damage Severity Predictor")
     st.markdown("### A Machine Learning project to enhance aviation safety through data.")
-    st.write("Welcome! This application uses a pre-trained machine learning model to predict aircraft damage severity.")
+    st.write("""
+    Welcome to the Aircraft Damage Severity Predictor. This application leverages a sophisticated machine learning model, pre-trained on over 80,000 historical aviation incidents, to predict the extent of damage to an aircraft.
+    
+    By analyzing key factors such as aircraft type, weather conditions, and phase of flight, our system identifies hidden risk patterns that contribute to severe outcomes. This data-driven approach is crucial for modern safety analysis.
+    
+    **Our Goal:** To provide a robust tool that aids in pilot training, enhances risk assessment protocols, and ultimately contributes to the prevention of future incidents, making air travel safer for everyone.
+    """)
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
     col1.metric("Incidents Analyzed", "80,000+")
@@ -90,47 +96,65 @@ elif selected == "Live Prediction":
             input_df = pd.DataFrame([input_features])
             model_to_predict = best_model_pack['model']
             encoders = best_model_pack['encoders']
-            
             for col, encoder in encoders.items():
                 if col in input_df.columns:
                     val = input_df.iloc[0][col]
-                    # Handle unseen labels by mapping to 'Unknown'
-                    if val not in encoder.classes_:
-                        input_df.loc[0, col] = 'Unknown'
+                    if val not in encoder.classes_: input_df.loc[0, col] = 'Unknown'
                     input_df[col] = encoder.transform(input_df[col])
-            
-            # Ensure columns are in the same order as during training
             input_df = input_df[model_to_predict.get_booster().feature_names]
-            
-            # Make prediction
             prediction_encoded = model_to_predict.predict(input_df)[0]
-            prediction_proba = model_to_predict.predict_proba(input_df) # Get probabilities
             prediction_decoded = encoders['target'].inverse_transform([prediction_encoded])[0]
-            
-            # --- DISPLAY RESULTS ---
-            res_col1, res_col2 = st.columns(2)
-            with res_col1:
-                st.subheader("Prediction Result")
-                if prediction_decoded == "Destroyed":
-                    st.error(f"Predicted Damage Severity: **{prediction_decoded}**")
-                elif prediction_decoded == "Substantial":
-                    st.warning(f"Predicted Damage Severity: **{prediction_decoded}**")
-                else:
-                    st.success(f"Predicted Damage Severity: **{prediction_decoded}**")
-
-            with res_col2:
-                st.subheader("Prediction Probabilities")
-                prob_df = pd.DataFrame(prediction_proba, columns=encoders['target'].classes_)
-                st.dataframe(prob_df)
+            st.subheader("Prediction Result")
+            if prediction_decoded == "Destroyed": st.error(f"Predicted Damage Severity: **{prediction_decoded}**")
+            elif prediction_decoded == "Substantial": st.warning(f"Predicted Damage Severity: **{prediction_decoded}**")
+            else: st.success(f"Predicted Damage Severity: **{prediction_decoded}**")
 
 # --- Crash Case Studies Page ---
 elif selected == "Crash Case Studies":
-    st.title("📖 Crash Case Studies")
-    st.markdown("A review of notable aviation incidents.")
-    with st.expander("🇮🇳 Indian Airlines Flight 113 (Ahmedabad, 1988)"):
-        st.markdown("The flight crashed on final approach to Ahmedabad in poor visibility, striking trees and a pylon. The investigation cited crew error.")
-    with st.expander("🇺🇸 US Airways Flight 1549 - 'Miracle on the Hudson' (New York, 2009)"):
-        st.markdown("The aircraft lost all engine power after a bird strike. The crew successfully ditched the plane on the Hudson River with no fatalities.")
+    st.title("📖 Crash Case Studies & Model Analysis")
+    st.markdown("A review of notable aviation incidents. Click the button on any case to see how our model would have predicted the outcome based on the known data.")
+
+    crashes = {
+        "Indian Airlines Flight 113": {
+            "summary": "**Date:** Oct 19, 1988 | **Aircraft:** Boeing 737-200 | **Fatalities:** 133\n\nThe flight crashed on final approach to Ahmedabad in poor visibility, striking trees and a pylon. The investigation cited crew error.",
+            "data": {'Make': 'Boeing', 'Model': '737-2A8', 'Engine_Type': 'Turbojet', 'Number_of_Engines': 2, 'Weather_Condition': 'IMC', 'Broad_phase_of_flight': 'Approach', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'India', 'Year': 1988, 'Month': 10, 'Total_Fatal_Injuries': 133, 'Total_Serious_Injuries': 0}
+        },
+        "US Airways Flight 1549": {
+            "summary": "**Date:** Jan 15, 2009 | **Aircraft:** Airbus A320-214 | **Fatalities:** 0\n\nKnown as the 'Miracle on the Hudson,' the aircraft lost all engine power after a bird strike. The crew successfully ditched the plane on the Hudson River with no fatalities.",
+            "data": {'Make': 'Airbus', 'Model': 'A320-214', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'United States', 'Year': 2009, 'Month': 1, 'Total_Fatal_Injuries': 0, 'Total_Serious_Injuries': 5}
+        },
+        "Air France Flight 447": {
+            "summary": "**Date:** June 1, 2009 | **Aircraft:** Airbus A330-203 | **Fatalities:** 228\n\nThe aircraft stalled at high altitude after its airspeed sensors (pitot tubes) froze over. The crew's incorrect response led to the crash in the Atlantic Ocean.",
+            "data": {'Make': 'Airbus', 'Model': 'A330-203', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'IMC', 'Broad_phase_of_flight': 'Cruise', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Unknown', 'Year': 2009, 'Month': 6, 'Total_Fatal_Injuries': 228, 'Total_Serious_Injuries': 0}
+        },
+        "Japan Airlines Flight 123": {
+            "summary": "**Date:** Aug 12, 1985 | **Aircraft:** Boeing 747SR | **Fatalities:** 520\n\nThe deadliest single-aircraft accident in history. A faulty repair led to an explosive decompression which destroyed all hydraulic controls.",
+            "data": {'Make': 'Boeing', 'Model': '747SR-46', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 4, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Japan', 'Year': 1985, 'Month': 8, 'Total_Fatal_Injuries': 520, 'Total_Serious_Injuries': 4}
+        },
+        "Ethiopian Airlines Flight 302": {
+            "summary": "**Date:** Mar 10, 2019 | **Aircraft:** Boeing 737 MAX 8 | **Fatalities:** 157\n\nA faulty sensor activated the MCAS flight control system, repeatedly pushing the aircraft's nose down. The pilots were unable to regain control.",
+            "data": {'Make': 'Boeing', 'Model': '737-8 (MAX)', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Ethiopia', 'Year': 2019, 'Month': 3, 'Total_Fatal_Injuries': 157, 'Total_Serious_Injuries': 0}
+        },
+    }
+
+    for crash_name, crash_info in crashes.items():
+        with st.expander(f"✈️ **{crash_name}**"):
+            st.markdown(crash_info['summary'])
+            if st.button(f"Run Prediction for {crash_name}", key=crash_name):
+                input_df = pd.DataFrame([crash_info['data']])
+                model_to_predict = best_model_pack['model']
+                encoders = best_model_pack['encoders']
+                for col, encoder in encoders.items():
+                    if col in input_df.columns:
+                        val = input_df.iloc[0][col]
+                        if val not in encoder.classes_: input_df.loc[0, col] = 'Unknown'
+                        input_df[col] = encoder.transform(input_df[col])
+                input_df = input_df[model_to_predict.get_booster().feature_names]
+                prediction_encoded = model_to_predict.predict(input_df)[0]
+                prediction_decoded = encoders['target'].inverse_transform([prediction_encoded])[0]
+                st.subheader("Model's Analysis:")
+                if prediction_decoded == "Destroyed": st.error(f"Predicted Damage: **{prediction_decoded}**")
+                else: st.warning(f"Predicted Damage: **{prediction_decoded}**")
 
 # --- Model Performance Page ---
 elif selected == "Model Performance":
