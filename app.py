@@ -90,18 +90,38 @@ elif selected == "Live Prediction":
             input_df = pd.DataFrame([input_features])
             model_to_predict = best_model_pack['model']
             encoders = best_model_pack['encoders']
+            
             for col, encoder in encoders.items():
                 if col in input_df.columns:
                     val = input_df.iloc[0][col]
-                    if val not in encoder.classes_: input_df.loc[0, col] = 'Unknown'
+                    # Handle unseen labels by mapping to 'Unknown'
+                    if val not in encoder.classes_:
+                        input_df.loc[0, col] = 'Unknown'
                     input_df[col] = encoder.transform(input_df[col])
+            
+            # Ensure columns are in the same order as during training
             input_df = input_df[model_to_predict.get_booster().feature_names]
+            
+            # Make prediction
             prediction_encoded = model_to_predict.predict(input_df)[0]
+            prediction_proba = model_to_predict.predict_proba(input_df) # Get probabilities
             prediction_decoded = encoders['target'].inverse_transform([prediction_encoded])[0]
-            st.subheader("Prediction Result")
-            if prediction_decoded == "Destroyed": st.error(f"Predicted Damage Severity: **{prediction_decoded}**")
-            elif prediction_decoded == "Substantial": st.warning(f"Predicted Damage Severity: **{prediction_decoded}**")
-            else: st.success(f"Predicted Damage Severity: **{prediction_decoded}**")
+            
+            # --- DISPLAY RESULTS ---
+            res_col1, res_col2 = st.columns(2)
+            with res_col1:
+                st.subheader("Prediction Result")
+                if prediction_decoded == "Destroyed":
+                    st.error(f"Predicted Damage Severity: **{prediction_decoded}**")
+                elif prediction_decoded == "Substantial":
+                    st.warning(f"Predicted Damage Severity: **{prediction_decoded}**")
+                else:
+                    st.success(f"Predicted Damage Severity: **{prediction_decoded}**")
+
+            with res_col2:
+                st.subheader("Prediction Probabilities")
+                prob_df = pd.DataFrame(prediction_proba, columns=encoders['target'].classes_)
+                st.dataframe(prob_df)
 
 # --- Crash Case Studies Page ---
 elif selected == "Crash Case Studies":
