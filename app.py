@@ -56,18 +56,15 @@ if selected == "Home":
     st.title("✈️ Aircraft Damage Severity Predictor")
     st.markdown("### A Machine Learning project to enhance aviation safety through data.")
     st.write("""
-    Welcome to the Aircraft Damage Severity Predictor. This application leverages a sophisticated machine learning model, pre-trained on over 80,000 historical aviation incidents, to predict the extent of damage to an aircraft.
-    
-    By analyzing key factors such as aircraft type, weather conditions, and phase of flight, our system identifies hidden risk patterns that contribute to severe outcomes. This data-driven approach is crucial for modern safety analysis.
-    
-    **Our Goal:** To provide a robust tool that aids in pilot training, enhances risk assessment protocols, and ultimately contributes to the prevention of future incidents, making air travel safer for everyone.
+    Welcome! This application uses a pre-trained machine learning model to predict aircraft damage severity. 
+    By analyzing key factors from over 80,000 historical incidents, our system identifies risk patterns to help prevent future accidents.
     """)
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
     col1.metric("Incidents Analyzed", "80,000+")
     col2.metric("Prediction Accuracy", f"{best_model_pack['performance']['Accuracy']:.2%}")
     col3.metric("Key Risk Factor", "Fatal Injuries")
-    st.info("Navigate through the tabs to predict outcomes, review case studies, analyze model performance, and explore historical data trends.")
+    st.info("Navigate through the tabs to predict outcomes, review case studies, and explore historical data trends.")
 
 # --- Live Prediction Page ---
 elif selected == "Live Prediction":
@@ -101,6 +98,7 @@ elif selected == "Live Prediction":
             input_df = pd.DataFrame([input_features])
             model_to_predict = best_model_pack['model']
             encoders = best_model_pack['encoders']
+            
             for col, encoder in encoders.items():
                 if col in input_df.columns:
                     val = input_df.iloc[0][col]
@@ -136,17 +134,33 @@ elif selected == "Crash Case Studies":
     st.markdown("A review of notable aviation incidents. Click the button on any case to see how our model would have predicted the outcome based on the known data.")
 
     crashes = {
-        "Indian Airlines Flight 113": {
+        "Tenerife Airport Disaster (1977)": {
+            "summary": "**Date:** Mar 27, 1977 | **Aircraft:** Boeing 747 | **Fatalities:** 583\n\nThe deadliest accident in aviation history. Two Boeing 747s collided on the runway in heavy fog due to miscommunications.",
+            "data": {'Make': 'Boeing', 'Model': '747-206B', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 4, 'Weather_Condition': 'IMC', 'Broad_phase_of_flight': 'Takeoff', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Spain', 'Year': 1977, 'Month': 3, 'Total_Fatal_Injuries': 583, 'Total_Serious_Injuries': 61}
+        },
+        "Japan Airlines Flight 123 (1985)": {
+            "summary": "**Date:** Aug 12, 1985 | **Aircraft:** Boeing 747SR | **Fatalities:** 520\n\nThe deadliest single-aircraft accident in history. A faulty repair led to an explosive decompression which destroyed all hydraulic controls.",
+            "data": {'Make': 'Boeing', 'Model': '747SR-46', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 4, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Japan', 'Year': 1985, 'Month': 8, 'Total_Fatal_Injuries': 520, 'Total_Serious_Injuries': 4}
+        },
+        "Indian Airlines Flight 113 (1988)": {
             "summary": "**Date:** Oct 19, 1988 | **Aircraft:** Boeing 737-200 | **Fatalities:** 133\n\nThe flight crashed on final approach to Ahmedabad in poor visibility, striking trees and a pylon. The investigation cited crew error.",
             "data": {'Make': 'Boeing', 'Model': '737-2A8', 'Engine_Type': 'Turbojet', 'Number_of_Engines': 2, 'Weather_Condition': 'IMC', 'Broad_phase_of_flight': 'Approach', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'India', 'Year': 1988, 'Month': 10, 'Total_Fatal_Injuries': 133, 'Total_Serious_Injuries': 0}
         },
-        "US Airways Flight 1549": {
+        "US Airways Flight 1549 (2009)": {
             "summary": "**Date:** Jan 15, 2009 | **Aircraft:** Airbus A320-214 | **Fatalities:** 0\n\nKnown as the 'Miracle on the Hudson,' the aircraft lost all engine power after a bird strike. The crew successfully ditched the plane on the Hudson River with no fatalities.",
             "data": {'Make': 'Airbus', 'Model': 'A320-214', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'United States', 'Year': 2009, 'Month': 1, 'Total_Fatal_Injuries': 0, 'Total_Serious_Injuries': 5}
         },
-        "Japan Airlines Flight 123": {
-            "summary": "**Date:** Aug 12, 1985 | **Aircraft:** Boeing 747SR | **Fatalities:** 520\n\nThe deadliest single-aircraft accident in history. A faulty repair led to an explosive decompression which destroyed all hydraulic controls.",
-            "data": {'Make': 'Boeing', 'Model': '747SR-46', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 4, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Japan', 'Year': 1985, 'Month': 8, 'Total_Fatal_Injuries': 520, 'Total_Serious_Injuries': 4}
+        "Air France Flight 447 (2009)": {
+            "summary": "**Date:** June 1, 2009 | **Aircraft:** Airbus A330-203 | **Fatalities:** 228\n\nThe aircraft stalled at high altitude after its airspeed sensors (pitot tubes) froze over. The crew's incorrect response led to the crash in the Atlantic Ocean.",
+            "data": {'Make': 'Airbus', 'Model': 'A330-203', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'IMC', 'Broad_phase_of_flight': 'Cruise', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Unknown', 'Year': 2009, 'Month': 6, 'Total_Fatal_Injuries': 228, 'Total_Serious_Injuries': 0}
+        },
+        "Lion Air Flight 610 (2018)": {
+            "summary": "**Date:** Oct 29, 2018 | **Aircraft:** Boeing 737 MAX 8 | **Fatalities:** 189\n\nOne of two fatal crashes involving the Boeing 737 MAX. A faulty angle of attack sensor activated the MCAS flight control system, repeatedly pushing the aircraft's nose down until the pilots lost control.",
+            "data": {'Make': 'Boeing', 'Model': '737-8 (MAX)', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Indonesia', 'Year': 2018, 'Month': 10, 'Total_Fatal_Injuries': 189, 'Total_Serious_Injuries': 0}
+        },
+        "Ethiopian Airlines Flight 302 (2019)": {
+            "summary": "**Date:** Mar 10, 2019 | **Aircraft:** Boeing 737 MAX 8 | **Fatalities:** 157\n\nSimilar to the Lion Air crash, a faulty sensor activated the MCAS system, leading to the worldwide grounding of the 737 MAX fleet.",
+            "data": {'Make': 'Boeing', 'Model': '737-8 (MAX)', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Ethiopia', 'Year': 2019, 'Month': 3, 'Total_Fatal_Injuries': 157, 'Total_Serious_Injuries': 0}
         },
     }
 
