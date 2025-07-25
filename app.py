@@ -32,6 +32,11 @@ models_info, chart_data = load_assets()
 best_model_name = "XGBoost (Optimized)"
 best_model_pack = models_info[best_model_name]
 
+
+# --- Main Title Added Here ---
+st.markdown("<h1 style='text-align: center; font-weight: bold;'>AVIATION DAMAGE PREDICTION SYSTEM</h1>", unsafe_allow_html=True)
+
+
 # -----------------
 # Horizontal Navigation Bar
 # -----------------
