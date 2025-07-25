@@ -106,13 +106,29 @@ elif selected == "Live Prediction":
                     val = input_df.iloc[0][col]
                     if val not in encoder.classes_: input_df.loc[0, col] = 'Unknown'
                     input_df[col] = encoder.transform(input_df[col])
+            
             input_df = input_df[model_to_predict.get_booster().feature_names]
+            
+            # --- Prediction Logic with Probabilities ---
             prediction_encoded = model_to_predict.predict(input_df)[0]
+            prediction_proba = model_to_predict.predict_proba(input_df)
             prediction_decoded = encoders['target'].inverse_transform([prediction_encoded])[0]
-            st.subheader("Prediction Result")
-            if prediction_decoded == "Destroyed": st.error(f"Predicted Damage Severity: **{prediction_decoded}**")
-            elif prediction_decoded == "Substantial": st.warning(f"Predicted Damage Severity: **{prediction_decoded}**")
-            else: st.success(f"Predicted Damage Severity: **{prediction_decoded}**")
+            
+            # --- Display Results ---
+            res_col1, res_col2 = st.columns(2)
+            with res_col1:
+                st.subheader("Prediction Result")
+                if prediction_decoded == "Destroyed":
+                    st.error(f"Predicted Damage Severity: **{prediction_decoded}**")
+                elif prediction_decoded == "Substantial":
+                    st.warning(f"Predicted Damage Severity: **{prediction_decoded}**")
+                else:
+                    st.success(f"Predicted Damage Severity: **{prediction_decoded}**")
+
+            with res_col2:
+                st.subheader("Prediction Probabilities")
+                prob_df = pd.DataFrame(prediction_proba, columns=encoders['target'].classes_)
+                st.dataframe(prob_df)
 
 # --- Crash Case Studies Page ---
 elif selected == "Crash Case Studies":
@@ -128,17 +144,9 @@ elif selected == "Crash Case Studies":
             "summary": "**Date:** Jan 15, 2009 | **Aircraft:** Airbus A320-214 | **Fatalities:** 0\n\nKnown as the 'Miracle on the Hudson,' the aircraft lost all engine power after a bird strike. The crew successfully ditched the plane on the Hudson River with no fatalities.",
             "data": {'Make': 'Airbus', 'Model': 'A320-214', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'United States', 'Year': 2009, 'Month': 1, 'Total_Fatal_Injuries': 0, 'Total_Serious_Injuries': 5}
         },
-        "Air France Flight 447": {
-            "summary": "**Date:** June 1, 2009 | **Aircraft:** Airbus A330-203 | **Fatalities:** 228\n\nThe aircraft stalled at high altitude after its airspeed sensors (pitot tubes) froze over. The crew's incorrect response led to the crash in the Atlantic Ocean.",
-            "data": {'Make': 'Airbus', 'Model': 'A330-203', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'IMC', 'Broad_phase_of_flight': 'Cruise', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Unknown', 'Year': 2009, 'Month': 6, 'Total_Fatal_Injuries': 228, 'Total_Serious_Injuries': 0}
-        },
         "Japan Airlines Flight 123": {
             "summary": "**Date:** Aug 12, 1985 | **Aircraft:** Boeing 747SR | **Fatalities:** 520\n\nThe deadliest single-aircraft accident in history. A faulty repair led to an explosive decompression which destroyed all hydraulic controls.",
             "data": {'Make': 'Boeing', 'Model': '747SR-46', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 4, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Japan', 'Year': 1985, 'Month': 8, 'Total_Fatal_Injuries': 520, 'Total_Serious_Injuries': 4}
-        },
-        "Ethiopian Airlines Flight 302": {
-            "summary": "**Date:** Mar 10, 2019 | **Aircraft:** Boeing 737 MAX 8 | **Fatalities:** 157\n\nA faulty sensor activated the MCAS flight control system, repeatedly pushing the aircraft's nose down. The pilots were unable to regain control.",
-            "data": {'Make': 'Boeing', 'Model': '737-8 (MAX)', 'Engine_Type': 'Turbofan', 'Number_of_Engines': 2, 'Weather_Condition': 'VMC', 'Broad_phase_of_flight': 'Climb', 'Purpose_of_flight': 'Scheduled Passenger', 'Country': 'Ethiopia', 'Year': 2019, 'Month': 3, 'Total_Fatal_Injuries': 157, 'Total_Serious_Injuries': 0}
         },
     }
 
@@ -154,12 +162,24 @@ elif selected == "Crash Case Studies":
                         val = input_df.iloc[0][col]
                         if val not in encoder.classes_: input_df.loc[0, col] = 'Unknown'
                         input_df[col] = encoder.transform(input_df[col])
+                
                 input_df = input_df[model_to_predict.get_booster().feature_names]
+                
                 prediction_encoded = model_to_predict.predict(input_df)[0]
+                prediction_proba = model_to_predict.predict_proba(input_df)
                 prediction_decoded = encoders['target'].inverse_transform([prediction_encoded])[0]
-                st.subheader("Model's Analysis:")
-                if prediction_decoded == "Destroyed": st.error(f"Predicted Damage: **{prediction_decoded}**")
-                else: st.warning(f"Predicted Damage: **{prediction_decoded}**")
+                
+                res_col1, res_col2 = st.columns(2)
+                with res_col1:
+                    st.subheader("Model's Analysis:")
+                    if prediction_decoded == "Destroyed":
+                        st.error(f"Predicted Damage: **{prediction_decoded}**")
+                    else:
+                        st.warning(f"Predicted Damage: **{prediction_decoded}**")
+                with res_col2:
+                    st.subheader("Probabilities:")
+                    prob_df = pd.DataFrame(prediction_proba, columns=encoders['target'].classes_)
+                    st.dataframe(prob_df)
 
 # --- Model Performance Page ---
 elif selected == "Model Performance":
